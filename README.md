@@ -38,7 +38,7 @@ One of our preprocess include following steps: `drop_nan` -> `remove_punctuation
 ### Comparing
 Here need to add graph with metrics for two models
 
-## DL algorithm
+## DL algorithms
 ### CNN
 ### LSTM
 ### Comparing
