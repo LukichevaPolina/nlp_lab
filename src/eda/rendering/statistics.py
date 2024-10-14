@@ -13,7 +13,7 @@ def plot_class_distribution(data: pd.DataFrame) -> None:
     plt.ylabel("frequency", fontsize=9)
     fig.savefig(f"{SAVE_PATH}class_distribution.png")
 
-def class_features_distribution(data, plot_title, function, function_name):
+def class_features_distribution(data, plot_title, function, function_name) -> None:
     log.info(f"PLOT: save statistics {plot_title} graphs into graphs/")
     classes = data["status"].unique()
     fig, ax = plt.subplots(nrows=2, ncols=4, sharex=False, sharey=True, figsize=(17, 10))

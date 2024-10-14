@@ -47,7 +47,6 @@ TARGET2ENUM = {
     "remove_all": Preprocessor.REMOWE_ALL_STOP_WORDS_AND_PUNCTUATION,
 }
 
-# TODO change file chekpoint name
 class TextClassificationPipeline:
     def __init__(
             self, 

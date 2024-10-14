@@ -26,4 +26,25 @@ As you can see we have disbalanced classes, we deal with it using [class weight]
 We conclude that our data include short sentences around 5-50 words for `Normal`, around 1000-1500 of that for `Suicidal` and `Personality disorder`, about 500-600 of that for `Anxiety`, `Depression`, `Bipolar` and `Stress`, few punctuation and few digits. So the statistics say that `Suicidal` and `Personality disorder` people have a numerous thoughts, probably unnecessary. Notice also that almost all histograms are left shifted. 
 
 Below we provide the histograms of more frequent words in our data.
- 
+
+![alt text](./graphs/data_info.png)
+> The chart consist of histogram of the top 20 frequently words. The top 3 words are `feel`, `like`, `want`.
+
+One of our preprocess include following steps: `drop_nan` -> `remove_punctuation` -> `remove_digits` -> `remove_stop_words` -> `tokenize` -> `stemming` -> `lemmatization`. The embeddings strategy is `tfidf`. We want to exam the four models: `svm`, `decision_tree`, `cnn` and `lstm`.
+
+## Classical algorithms
+### SVM
+### Decision Tree
+### Comparing
+Here need to add graph with metrics for two models
+
+## DL algorithm
+### CNN
+### LSTM
+### Comparing
+Here need to add graph with metrics for two models
+
+Here need to add graph with losses for two models
+
+## Total Comparing
+Here need to add graph with metrics for four models
