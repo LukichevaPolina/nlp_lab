@@ -3,9 +3,20 @@
 ## Prerequests
 > Python3.12 is used
 
-1. Install requirements.txt
+1. Clone the reposiroty
+```bash
+git clone https://github.com/LukichevaPolina/nlp_lab.git
+cd nlp_lab
+```
+
+2. Install requirements.txt
 ```bash
 pip3 install -r requirements.txt
+```
+
+3. Set up `PYTHONPATH`
+```bash
+export PYTHONPATH=$PYTHONPATH:$PWD
 ```
 
 ## EDA
