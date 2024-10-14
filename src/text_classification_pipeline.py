@@ -9,8 +9,9 @@ import pandas as pd
 from string import punctuation
 
 from src.utils.get_data import get_data
-from src.eda.preprocessing import (drop_nan, remove_punctuation, remove_digits,
+from src.eda.preprocessing.preprocessing import (drop_nan, remove_punctuation, remove_digits,
                                    remove_stop_words, tokenize, stemming, lemmatization)
+from src.eda.preprocessing.embeddings import tfidf_embeddings
 from src.eda.rendering.statistics import class_features_distribution, plot_class_distribution
 
 SEED = 4200
@@ -103,7 +104,9 @@ class TextClassificationPipeline:
             preprocess_data = remove_stop_words(preprocess_data)
             preprocess_data = tokenize(preprocess_data)
             preprocess_data = stemming(preprocess_data)
-            return lemmatization(preprocess_data)
+            preprocess_data = lemmatization(preprocess_data)
+            # add plot of data
+            return preprocess_data
         else:
             raise NotImplementedError
 

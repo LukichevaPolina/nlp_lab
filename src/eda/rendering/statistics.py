@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import logging as log
 
 SAVE_PATH = "../../../graphs/"
 
 def plot_class_distribution(data: pd.DataFrame) -> None:
+    log.info("PLOT: save class distribution into graphs/")
     fig = plt.figure(figsize=(9, 5))
     plt.hist(data["status"], bins=50, histtype="barstacked")
     fig.suptitle("Class distribution", fontsize=15)
@@ -12,6 +14,7 @@ def plot_class_distribution(data: pd.DataFrame) -> None:
     fig.savefig(f"{SAVE_PATH}class_distribution.png")
 
 def class_features_distribution(data, plot_title, function, function_name):
+    log.info(f"PLOT: save statistics {plot_title} graphs into graphs/")
     classes = data["status"].unique()
     fig, ax = plt.subplots(nrows=2, ncols=4, sharex=False, sharey=True, figsize=(17, 10))
     fig.suptitle(plot_title, fontsize=15)
