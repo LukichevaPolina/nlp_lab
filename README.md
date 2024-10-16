@@ -48,3 +48,6 @@ Here need to add graph with losses for two models
 
 ## Total Comparing
 Here need to add graph with metrics for four models
+
+## Example of running
+python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import logging as log
 import pandas as pd
 
-SAVE_PATH = "../../../graphs/"
+SAVE_PATH = "graphs/"
 
 def plot_data_information(data: pd.DataFrame) -> None:
     log.info("PLOT: save data information into graphs")

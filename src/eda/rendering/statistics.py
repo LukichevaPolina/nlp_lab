@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import logging as log
 
-SAVE_PATH = "../../../graphs/"
+SAVE_PATH = "graphs/"
 
 def plot_class_distribution(data: pd.DataFrame) -> None:
     log.info("PLOT: save class distribution into graphs/")
