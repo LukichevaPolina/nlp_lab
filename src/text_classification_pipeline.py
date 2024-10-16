@@ -115,8 +115,8 @@ class TextClassificationPipeline:
                 svc = SVC(self._checkpoint_path)
                 svc.train(X_train, y_train)
             case Algorithm.DECISION_TREE:
-                svc = DecisionTree(self._checkpoint_path)
-                svc.train(X_train, y_train)
+                dt = DecisionTree(self._checkpoint_path)
+                dt.train(X_train, y_train)
             case Algorithm.CNN:
                 raise NotImplementedError
             case Algorithm.LSTM:
