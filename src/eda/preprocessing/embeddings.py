@@ -4,7 +4,9 @@ from typing import Any
 import logging as log
 
 # TODO add word2vec
-def tfidf_embeddings(data) -> Any:
+
+# TODO add saving of vectorizer to apply for input(just a sentence) in infer or eval
+def tfidf_embeddings(data, mode) -> Any:
     log.info("Embeddings: recived tfidf embeddings")
     vectorizer = TfidfVectorizer()
     data["statement"] = data["statement"].map(' '.join)
