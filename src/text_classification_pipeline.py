@@ -84,7 +84,6 @@ class TextClassificationPipeline:
         ) -> None:
         self._dataset = get_data(path=dataset_path)
 
-        # TODO add dict for embeddings types
         # TODO add dict for classic algorithm results
         # TODO add dict for dl algorithm results
         # TODO add metrics
