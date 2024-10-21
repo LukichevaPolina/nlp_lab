@@ -21,7 +21,7 @@ class ConvPsychoNet(nn.Module):
             conv3x3(4, 16, act=nn.LeakyReLU(negative_slope=0.02, inplace=True), norm=nn.BatchNorm2d(16), bias=False),
         )
 
-        self._gated = gate(15456, 1024, 15456)
+        self._gated = gate(966, 64, 966)
 
         self._layer2 = nn.Sequential(
             conv3x3(16, 32, act=nn.LeakyReLU(negative_slope=0.02, inplace=True), norm=nn.BatchNorm2d(32), bias=False),        
@@ -42,7 +42,7 @@ class ConvPsychoNet(nn.Module):
         out_layer1 = self._layer1(resized_out)
         #print(f"{out_layer1.shape=}")
 
-        gated_out = self._gated(out_layer1.reshape(out_layer1.shape[0], 1, 1, -1))
+        gated_out = self._gated(out_layer1.reshape(out_layer1.shape[0], out_layer1.shape[1], 1, -1))
         #print(f"{gated_out.shape=}")
 
         gated_out = gated_out.reshape_as(out_layer1)
