@@ -27,10 +27,12 @@ from src.eda.rendering.statistics import (
     class_features_distribution, plot_class_distribution
 )
 
+import torch
+
 SEED = 4200
 random.seed(SEED)
 np.random.seed(SEED)
-# TODO add torch random seed
+torch.manual_seed(SEED)
 
 class Preprocessor(Enum):
     REMOWE_ALL_STOP_WORDS_AND_PUNCTUATION=1

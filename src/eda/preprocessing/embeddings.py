@@ -30,4 +30,12 @@ class TFIDFVectorizer:
         enc.fit(data)
         y = enc.transform(data)
 
+        print(f"{enc.transform(["Anxiety"])=}")
+        print(f"{enc.transform(["Depression"])=}")
+        print(f"{enc.transform(["Normal"])=}")
+        print(f"{enc.transform(["Suicidal"])=}")
+        print(f"{enc.transform(["Stress"])=}")
+        print(f"{enc.transform(["Bipolar"])=}")
+        print(f"{enc.transform(["Personality disorder"])=}")
+
         return y

@@ -15,7 +15,6 @@ class ConvPsychoNet(nn.Module):
             bias=True
         )
 
-        # TODO: before main_layer resize
         self._layer1 = nn.Sequential(
             conv3x3(in_channels, 4, act=nn.LeakyReLU(negative_slope=0.02, inplace=True), norm=nn.BatchNorm2d(4), bias=False),        
             conv3x3(4, 16, act=nn.LeakyReLU(negative_slope=0.02, inplace=True), norm=nn.BatchNorm2d(16), bias=False),
@@ -58,3 +57,23 @@ class ConvPsychoNet(nn.Module):
         #print(f"{out_last.shape=}")
 
         return out_last
+    
+    @staticmethod
+    def initialize(net) -> None:
+        if isinstance(net, nn.Conv2d):
+            if net.weight is not None:
+                nn.init.kaiming_normal_(net.weight.data, a=0.02, mode="fan_in", nonlinearity="leaky_relu")
+            if net.bias is not None:
+                nn.init.constant_(net.bias.data, 0.0)
+        
+        if isinstance(net, nn.Linear):
+            if net.weight is not None:
+                nn.init.xavier_uniform_(net.weight.data, gain=0.02)
+            if net.bias is not None:
+                nn.init.constant_(net.bias.data, 0.0)
+
+        if isinstance(net, nn.BatchNorm2d):
+            if net.weight is not None:
+                nn.init.constant_(net.weight.data, 1.0)
+            if net.bias is not None:
+                nn.init.constant_(net.bias.data, 0.0)

@@ -2,6 +2,7 @@ from torch import Tensor, nn
 from torch.utils.data import Dataset
 from scipy.sparse import csr_matrix
 import numpy as np
+import torch
 
 class CombinedDataset(Dataset):
     def __init__(self, X: csr_matrix, y: np.ndarray) -> None:
@@ -15,4 +16,4 @@ class CombinedDataset(Dataset):
     def __getitem__(self, index):
         X, y = self._X[index], self._y[index]
 
-        return X.toarray().reshape(-1, 14951), y
+        return torch.from_numpy(X.toarray().reshape(-1, 14951)), torch.from_numpy(y)
