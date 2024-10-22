@@ -6,7 +6,7 @@ import logging as log
 # TODO add word2vec
 
 # TODO add saving of vectorizer to apply for input(just a sentence) in infer or eval
-def tfidf_embeddings(data, mode) -> Any:
+def tfidf_embeddings(data) -> Any:
     log.info("Embeddings: recived tfidf embeddings")
     vectorizer = TfidfVectorizer()
     data["statement"] = data["statement"].map(' '.join)
@@ -15,6 +15,12 @@ def tfidf_embeddings(data, mode) -> Any:
         enc = LabelEncoder()
         enc.fit(data["status"])
         y = enc.transform(data["status"])
-
+        print(f"{enc.transform(["Anxiety"])=}")
+        print(f"{enc.transform(["Depression"])=}")
+        print(f"{enc.transform(["Normal"])=}")
+        print(f"{enc.transform(["Suicidal"])=}")
+        print(f"{enc.transform(["Stress"])=}")
+        print(f"{enc.transform(["Bipolar"])=}")
+        print(f"{enc.transform(["Personality disorder"])=}")
         return X, y
     return X
