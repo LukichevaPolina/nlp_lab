@@ -6,6 +6,7 @@ import logging as log
 # TODO add word2vec
 
 # TODO add saving of vectorizer to apply for input(just a sentence) in infer or eval
+# return vectorizer and save it in text classification pipeline class
 def tfidf_embeddings(data) -> Any:
     log.info("Embeddings: recived tfidf embeddings")
     vectorizer = TfidfVectorizer()

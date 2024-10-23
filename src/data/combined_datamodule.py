@@ -19,4 +19,4 @@ class CombinedDatamodule:
         return DataLoader(self._train_dataset, batch_size=self._train_bs, shuffle=True)
     
     def test_dataloader(self):
-        return DataLoader(self.test_dataloader, batch_size=self._test_bs, shuffle=False)
+        return DataLoader(self._test_dataset, batch_size=self._test_bs, shuffle=False)

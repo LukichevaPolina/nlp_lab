@@ -51,6 +51,12 @@ Here need to add graph with metrics for two models
 
 ## DL algorithms
 ### CNN
+```bash
+python3 main.py --dataset_path {dataset_path} --algorithm cnn --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval
+```
+Here need to add graph with metrics for one model
+Here need to add graph woth train/val losses for one model
+
 ### LSTM
 ### Comparing
 Here need to add graph with metrics for two models
