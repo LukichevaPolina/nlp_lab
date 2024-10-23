@@ -29,6 +29,15 @@ from src.eda.rendering.statistics import (
 
 import torch
 
+from src.models.cnn.train import cnn_train
+from src.models.cnn.infer import cnn_infer
+
+import pandas as pd
+
+from torcheval.metrics.classification.accuracy import MulticlassAccuracy
+from torcheval.metrics.classification.f1_score import MulticlassF1Score
+
+
 SEED = 4200
 random.seed(SEED)
 np.random.seed(SEED)
@@ -87,12 +96,11 @@ class TextClassificationPipeline:
         self._dataset = get_data(path=dataset_path)
 
         # TODO add dict for classic algorithm results
-        # TODO add dict for dl algorithm results
-        # TODO add metrics
         self._algorithm = self.str2enum(algorithm)
         self._preprocessor = self.str2enum(preprocessor)
         self._embedder = self.str2enum(embeddings)
         self._checkpoint_path = self.get_checkpoint(algorithm, embeddings, class_balancer, preprocessor)
+        self._metrics_path = self.get_metrics_name(algorithm, embeddings, class_balancer, preprocessor)
         self._mode = self.str2enum(mode)
         self._preprocessed_data = None
         self._vectorized_data = None
@@ -102,18 +110,23 @@ class TextClassificationPipeline:
         self.preprocess()
 
         if self._mode == Mode.INFER:
+<<<<<<< HEAD
             self.infer()
+=======
+            # TODO: vectorize data here is only words or class target too?
+            self.infer(vectorized_data)
+>>>>>>> 7b83bd6 (stability training and dump ,metrics)
         else:
             X_train, X_test, y_train, y_test = self.vectorize()
             if self._mode == Mode.TRAIN:
-                self.train(X_train, y_train)
+                self.train(X_train, y_train, X_test, y_test)
                 self.eval(X_test, y_test)
             elif self._mode == Mode.EVAL:
                 self.eval(X_test, y_test)
             else:
                 ValueError("Wrong mode")
 
-    def train(self, X_train, y_train) -> None:
+    def train(self, X_train, y_train, X_test, y_test) -> None:
         match self._algorithm:
             case Algorithm.SVM:
                 svc = SVC(self._checkpoint_path)
@@ -122,12 +135,16 @@ class TextClassificationPipeline:
                 dt = DecisionTree(self._checkpoint_path)
                 dt.train(X_train, y_train)
             case Algorithm.CNN:
-                raise NotImplementedError
+                train_metrics, train_losses, val_losses = cnn_train(self._checkpoint_path, X_train, y_train, X_test, y_test, num_epochs=2, batch_size=128)
+                pd.DataFrame(train_metrics).to_csv(f"metrics/train_metrics_{self._metrics_path}")
+                pd.DataFrame(train_losses).to_csv(f"metrics/train_losses_{self._metrics_path}")
+                pd.DataFrame(val_losses).to_csv(f"metrics/val_losses_{self._metrics_path}")
             case Algorithm.LSTM:
                 raise NotImplementedError
             case _:
                 raise ValueError(f"Given algorithm: {target} does not exist")
 
+    # TODO: add accuracy per classes: separete accuracy0 for class0 and so on
     def eval(self, X, y) -> None:
         y_pred = self.infer(X)
         f1 = f1_score(y, y_pred, average=None)
@@ -135,11 +152,32 @@ class TextClassificationPipeline:
         self._metrics["f1-score-weighted"] = f1_score(y, y_pred, average="weighted")
         self._metrics["balanced_accuracy_score"] = balanced_accuracy_score(y, y_pred)
 
+<<<<<<< HEAD
         print("Classification report:")
         print(self._metrics)
 
         self.save_results()
 
+=======
+        accuracy = -1.0
+        f1 = -1.0
+        if self._algorithm == Algorithm.SVM or self._algorithm == Algorithm.DECISION_TREE:
+            accuracy = accuracy_score(y, y_pred)
+            f1 = f1_score(y, y_pred, average="weighted")
+        elif self._algorithm == Algorithm.CNN or self._algorithm == Algorithm.LSTM:
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            compute_accuracy = MulticlassAccuracy("macro", num_classes=7).to(device)
+            compute_f1_score = MulticlassF1Score("micro", num_classes=7).to(device)
+            compute_accuracy.updata(y_pred, y)
+            compute_f1_score.updata(y_pred, y)
+            accuracy = compute_accuracy.compute().item() # Return not compute accuracy for all classes
+            f1 = compute_f1_score.compute().item()
+        else:
+            raise ValueError(f"Imposible eval, not algorithm = {self._algorithm}")
+
+        print(f"Metrics on test data: \taccuracy = {accuracy}, \tf1_score = {f1}")
+
+>>>>>>> 7b83bd6 (stability training and dump ,metrics)
     def infer(self, X) -> None:
         if not self._checkpoint_path.exists():
             raise RuntimeError(f"The checkpoint: {str(self._checkpoint_path)} does not exist, train first")
@@ -148,6 +186,14 @@ class TextClassificationPipeline:
             model = joblib.load(self._checkpoint_path)
             y = model.predict(X)
             return y
+<<<<<<< HEAD
+=======
+        elif self._algorithm == Algorithm.CNN:
+            y = cnn_infer(self._checkpoint_path, X)
+            return y
+        elif self._algorithm == Algorithm.LSTM:
+            pass
+>>>>>>> 7b83bd6 (stability training and dump ,metrics)
         else:
             NotImplementedError
 
@@ -233,3 +279,15 @@ class TextClassificationPipeline:
         checkpoints_dir = Path("checkpoints/")
         checkpoint_name = Path(self.get_checkpoint_name(algorithm, embeddings, class_balancer, preprocessor))
         return (checkpoints_dir.joinpath(checkpoint_name))
+    
+    def get_metrics_name(
+        self, 
+        algorithm: str, 
+        embeddigns: str,
+        class_balancer: str,
+        preprocessor: str
+    ) -> str:
+        if algorithm in ["svm", "decision_tree", "lstm", "cnn"]:
+            return f"{algorithm}_{embeddigns}_{class_balancer}_{preprocessor}.csv"
+        else:
+            raise ValueError(f"Given algorithm: {algorithm} does not exist")

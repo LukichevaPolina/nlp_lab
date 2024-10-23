@@ -16,10 +16,11 @@ random.seed(SEED)
 np.random.seed(SEED)
 torch.manual_seed(SEED)
 
-def train(chekpoint_save, X_train, y_train, X_test, y_test, num_epochs=100, batch_size=32) -> None: # Need to return metrics and losses from each epoch and mean
+def cnn_train(chekpoint_save, X_train, y_train, X_test, y_test, num_epochs=100, batch_size=32) -> None: # Need to return metrics and losses from each epoch and mean
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    datamodule = CombinedDatamodule(X_train, y_train, X_test, y_test, train_bs=batch_size, test_bs=4)
+    datamodule = CombinedDatamodule(X_train, y_train, X_test, y_test, train_bs=batch_size, test_bs=128)
+    datamodule.setup()
     train_dataloader = datamodule.train_dataloader()
     test_dataloader = datamodule.test_dataloader()
 
@@ -31,50 +32,52 @@ def train(chekpoint_save, X_train, y_train, X_test, y_test, num_epochs=100, batc
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.97048695)
     ce_loss = nn.CrossEntropyLoss(torch.Tensor([4.0, 5.0, 1.0, 1.0, 16.0, 7.5, 1.2])).to(device)
     
-    accuracy = MulticlassAccuracy(None, num_classes=7).to(device)
-    f1_score = MulticlassF1Score("micro", num_classes=7).to(device)
+    accuracy = MulticlassAccuracy(average="macro", num_classes=7).to(device)
+    f1_score = MulticlassF1Score(average="micro", num_classes=7).to(device)
 
     best_f1score = 0.0
+    train_metrics = {"accuracy": [], "f1score": []}
+    train_losses = {"ce": []}
+    val_losses = {"ce": []}
+    print(f"[INFO] Start training, epochs = {num_epochs}")
     for epoch in range(num_epochs):
         psycho_net.train()
         accuracy.reset()
         f1_score.reset()
 
         celosses = []
-        metrics = {"accuracy": [], "f1score": []}
-        train_losses = {"ce": []}
-        val_losses = {"ce": []}
         for X, y in train_dataloader:
+            X = X.unsqueeze(dim=1)
             psycho_net.zero_grad()
-            pred = psycho_net(X)
-
+            pred = psycho_net(X).squeeze()
             celoss = ce_loss(pred, y)
             celosses.append(celoss.item())
 
             celoss.backward()
             optimizer.step()
-
-            accuracy.update(pred, y)
-            f1_score.update(pred, y)
             
-        metrics["accuracy"].append(accuracy.compute())
-        metrics["f1score"].append(f1_score.compute())
+            y_pred = torch.softmax(pred, dim=1).argmax(dim=1)
+            accuracy.update(y_pred, y)
+            f1_score.update(y_pred, y)
+            
+        train_metrics["accuracy"].append(accuracy.compute().item())
+        train_metrics["f1score"].append(f1_score.compute().item())
         train_losses["ce"].append(np.array(celosses).mean())
 
-        val_loss = val(psycho_net, device, test_dataloader)
+        val_loss = cnn_val(psycho_net, device, test_dataloader)
         val_losses["ce"].append(val_loss)
 
-        if epoch % 5 == 0:
+        if epoch % 2 == 0:
             print(f"EPOCH={epoch}/TRAIN")
-            print(f"train_ce_loss={train_losses["ce"][-1]}, val_ce_loss={val_losses['ce'][-1]}, f1score={metrics['f1score'][-1]}")
-
-        if metrics["f1score"][-1] > best_f1score:
-            best_f1score = metrics["f1score"][-1]
-            torch.save(psycho_net.state_dict(), f"checkpoints/{chekpoint_save}-epoch{epoch}.pt")
+            print(f"train_ce_loss={train_losses["ce"][-1]}, val_ce_loss={val_losses['ce'][-1]}, f1score={train_metrics['f1score'][-1]}")
 
         scheduler.step()
     
-def val(psycho_net, device, test_dataloader):
+    torch.save(psycho_net.state_dict(), f"{chekpoint_save}")
+    print(f"[INFO] Training end")
+    return train_metrics, train_losses, val_losses
+    
+def cnn_val(psycho_net, device, test_dataloader):
     psycho_net.eval()
 
     celosses = []
@@ -82,7 +85,8 @@ def val(psycho_net, device, test_dataloader):
 
     with torch.no_grad():
         for X, y in test_dataloader:
-            pred = psycho_net(X)
+            X = X.unsqueeze(dim=1)
+            pred = psycho_net(X).squeeze()
 
             celoss = ce_loss(pred, y)
             celosses.append(celoss.item())
