@@ -120,7 +120,7 @@ class TextClassificationPipeline:
             X_train, X_test, y_train, y_test = self.vectorize()
             if self._mode == Mode.TRAIN:
                 self.train(X_train, y_train, X_test, y_test)
-                self.eval(X_test, y_test)
+                #self.eval(X_test, y_test) Only train, because eval break
             elif self._mode == Mode.EVAL:
                 self.eval(X_test, y_test)
             else:
@@ -135,7 +135,7 @@ class TextClassificationPipeline:
                 dt = DecisionTree(self._checkpoint_path)
                 dt.train(X_train, y_train)
             case Algorithm.CNN:
-                train_metrics, train_losses, val_losses = cnn_train(self._checkpoint_path, X_train, y_train, X_test, y_test, num_epochs=2, batch_size=128)
+                train_metrics, train_losses, val_losses = cnn_train(self._checkpoint_path, X_train, y_train, X_test, y_test, num_epochs=100, batch_size=64)
                 pd.DataFrame(train_metrics).to_csv(f"metrics/train_metrics_{self._metrics_path}")
                 pd.DataFrame(train_losses).to_csv(f"metrics/train_losses_{self._metrics_path}")
                 pd.DataFrame(val_losses).to_csv(f"metrics/val_losses_{self._metrics_path}")
@@ -166,8 +166,9 @@ class TextClassificationPipeline:
             f1 = f1_score(y, y_pred, average="weighted")
         elif self._algorithm == Algorithm.CNN or self._algorithm == Algorithm.LSTM:
             device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-            compute_accuracy = MulticlassAccuracy("macro", num_classes=7).to(device)
-            compute_f1_score = MulticlassF1Score("micro", num_classes=7).to(device)
+            # TODO add multiclass metrics print
+            compute_accuracy = MulticlassAccuracy(None, num_classes=7).to(device)
+            compute_f1_score = MulticlassF1Score(None, num_classes=7).to(device)
             compute_accuracy.updata(y_pred, y)
             compute_f1_score.updata(y_pred, y)
             accuracy = compute_accuracy.compute().item() # Return not compute accuracy for all classes
