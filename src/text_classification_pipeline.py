@@ -36,6 +36,8 @@ import pandas as pd
 from torcheval.metrics.classification.accuracy import MulticlassAccuracy
 from torcheval.metrics.classification.f1_score import MulticlassF1Score
 
+from utils.rendering import plot_learning_curve, plot_accuracy_curve, plot_f1_curve
+
 
 SEED = 4200
 random.seed(SEED)
@@ -62,7 +64,6 @@ class Algorithm(Enum):
 class Mode(Enum):
     TRAIN=1
     EVAL=2
-    INFER=3
 
 TARGET2ENUM = {
     "cnn": Algorithm.CNN,
@@ -104,20 +105,16 @@ class TextClassificationPipeline:
         preprocess_data = self.preprocess()
         vectorized_data = self.vectorize(preprocess_data)
 
-        if self._mode == Mode.INFER:
-            # TODO: vectorize data here is only words or class target too?
-            self.infer(vectorized_data)
+        X_data, y_data = vectorized_data
+        X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.3,
+                                                            random_state=42, stratify=y_data)
+        if self._mode == Mode.TRAIN:
+            self.train(X_train, y_train, X_test, y_test)
+            #self.eval(X_test, y_test) Only train, because eval break
+        elif self._mode == Mode.EVAL:
+            self.eval(X_test, y_test)
         else:
-            X_data, y_data = vectorized_data
-            X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.3,
-                                                                random_state=42, stratify=y_data)
-            if self._mode == Mode.TRAIN:
-                self.train(X_train, y_train, X_test, y_test)
-                #self.eval(X_test, y_test) Only train, because eval break
-            elif self._mode == Mode.EVAL:
-                self.eval(X_test, y_test)
-            else:
-                ValueError("Wrong mode")
+            ValueError("Wrong mode")
 
     def train(self, X_train, y_train, X_test, y_test) -> None:
         match self._algorithm:
@@ -128,10 +125,14 @@ class TextClassificationPipeline:
                 dt = DecisionTree(self._checkpoint_path)
                 dt.train(X_train, y_train)
             case Algorithm.CNN:
-                train_metrics, train_losses, val_losses = cnn_train(self._checkpoint_path, X_train, y_train, X_test, y_test, num_epochs=100, batch_size=64)
+                train_metrics, val_metrics, train_losses, val_losses = cnn_train(self._checkpoint_path, X_train, y_train, X_test, y_test, num_epochs=100, batch_size=64)
                 pd.DataFrame(train_metrics).to_csv(f"metrics/train_metrics_{self._metrics_path}")
+                pd.DataFrame(val_metrics).to_csv(f"metrics/val_metrics_{self._metrics_path}")
                 pd.DataFrame(train_losses).to_csv(f"metrics/train_losses_{self._metrics_path}")
                 pd.DataFrame(val_losses).to_csv(f"metrics/val_losses_{self._metrics_path}")
+                plot_learning_curve(train_losses, val_losses, "cnn_learning_curve")
+                plot_accuracy_curve(train_metrics["accuracy"], val_metrics["accuracy"], "cnn_accuracy_curve")
+                plot_f1_curve(train_metrics["f1score"], val_metrics["f1score"], "cnn_f1_curve")
             case Algorithm.LSTM:
                 raise NotImplementedError
             case _:
