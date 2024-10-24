@@ -9,7 +9,8 @@ import numpy as np
 import pandas as pd
 import joblib
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import balanced_accuracy_score, f1_score, classification_report
+import json
 
 from typing import Any, Dict
 
@@ -21,7 +22,7 @@ from src.eda.preprocessing.preprocessing import (
     drop_nan, remove_punctuation, remove_digits, remove_stop_words,
     tokenize, stemming, lemmatization
 )
-from src.eda.preprocessing.embeddings import tfidf_embeddings
+from src.eda.preprocessing.embeddings import TFIDFVectorizer
 from src.eda.rendering.statistics import (
     class_features_distribution, plot_class_distribution
 )
@@ -68,6 +69,8 @@ TARGET2ENUM = {
     "infer": Mode.INFER
 }
 
+ENUM2TARGET = dict(zip(TARGET2ENUM.values(), TARGET2ENUM.keys()))
+
 class TextClassificationPipeline:
     def __init__(
             self, 
@@ -90,17 +93,17 @@ class TextClassificationPipeline:
         self._embedder = self.str2enum(embeddings)
         self._checkpoint_path = self.get_checkpoint(algorithm, embeddings, class_balancer, preprocessor)
         self._mode = self.str2enum(mode)
+        self._preprocessed_data = None
+        self._vectorized_data = None
+        self._metrics = {}
     
     def run(self) -> None:
-        preprocess_data = self.preprocess()
-        vectorized_data = self.vectorize(preprocess_data)
+        self.preprocess()
 
         if self._mode == Mode.INFER:
-            self.infer(vectorized_data)
+            self.infer()
         else:
-            X_data, y_data = vectorized_data
-            X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.3,
-                                                                random_state=42, stratify=y_data)
+            X_train, X_test, y_train, y_test = self.vectorize()
             if self._mode == Mode.TRAIN:
                 self.train(X_train, y_train)
                 self.eval(X_test, y_test)
@@ -126,12 +129,15 @@ class TextClassificationPipeline:
 
     def eval(self, X, y) -> None:
         y_pred = self.infer(X)
+        f1 = f1_score(y, y_pred, average=None)
+        self._metrics["f1-score"] = dict((i,j) for i,j in enumerate(f1))
+        self._metrics["f1-score-weighted"] = f1_score(y, y_pred, average="weighted")
+        self._metrics["balanced_accuracy_score"] = balanced_accuracy_score(y, y_pred)
 
-        accuracy = accuracy_score(y, y_pred)
-        f1 = f1_score(y, y_pred, average="weighted")
+        print("Classification report:")
+        print(self._metrics)
 
-        print(f"Metrics on test data: \taccuracy = {accuracy}, \tf1_score = {f1}")
-
+        self.save_results()
 
     def infer(self, X) -> None:
         if not self._checkpoint_path.exists():
@@ -141,7 +147,6 @@ class TextClassificationPipeline:
             model = joblib.load(self._checkpoint_path)
             y = model.predict(X)
             return y
-
         else:
             NotImplementedError
 
@@ -160,23 +165,49 @@ class TextClassificationPipeline:
             preprocess_data = stemming(preprocess_data)
             preprocess_data = lemmatization(preprocess_data)
             plot_data_information(preprocess_data)
-            return preprocess_data
+            self._preprocessed_data = preprocess_data
         else:
             raise NotImplementedError
 
-    # TODO: is it okey to get preprocessed data as param?
-    def vectorize(self, data) -> Any:
+    def vectorize(self) -> Any:
         if self._embedder == Embeddings.TFIDF:
-            return tfidf_embeddings(data)
+            vectorizer = TFIDFVectorizer()
+            if self._mode == Mode.INFER:
+                return vectorizer.transform_X(self._preprocessed_data["statement"])
+            else:
+                # split dataset on train and test
+                X_train, X_test, y_train, y_test = train_test_split(self._preprocessed_data["statement"], self._preprocessed_data["status"],
+                                                                    test_size=0.3, random_state=42, stratify=self._preprocessed_data["status"])
+
+                vectorizer.fit_X(X_train)
+
+                X_train = vectorizer.transform_X(X_train)
+                X_test = vectorizer.transform_X(X_test)
+
+                y_train = vectorizer.fit_transform_y(y_train)
+                y_test = vectorizer.fit_transform_y(y_test)
+
+                return X_train, X_test, y_train, y_test
         else:
             raise NotImplementedError
+
+    def save_results(self) -> None:
+        file = "results/" + self.enum2str(self._algorithm) + ".json"
+        with open(file, 'w') as fp:
+            json.dump(self._metrics, fp)
 
     def str2enum(self, target: str) -> Algorithm:
         try:
             return TARGET2ENUM[target]
         except:
             raise ValueError(f"Given algorithm: {target} does not exist")
-    
+        
+    def enum2str(self, target: Algorithm) -> str:
+        try:
+            return ENUM2TARGET[target]
+        except:
+            raise ValueError(f"Given algorithm: {target} does not exist")
+
     def get_checkpoint_name(
         self, 
         algorithm: str, 
