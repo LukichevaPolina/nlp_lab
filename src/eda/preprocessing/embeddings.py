@@ -22,9 +22,9 @@ class TFIDFVectorizer:
             self._vectorizer = joblib.load(self._checkpoint_path)
             self._is_trained = True
 
-        X = self._vectorizer.transform(data)            
+        X = self._vectorizer.transform(data)
         return X
-    
+
     def fit_transform_y(self, data):
         enc = LabelEncoder()
         enc.fit(data)

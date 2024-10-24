@@ -129,7 +129,7 @@ class TextClassificationPipeline:
 
     def eval(self, X, y) -> None:
         y_pred = self.infer(X)
-        f1 = f1_score(y, y_pred, average=None) 
+        f1 = f1_score(y, y_pred, average=None)
         self._metrics["f1-score"] = dict((i,j) for i,j in enumerate(f1))
         self._metrics["f1-score-weighted"] = f1_score(y, y_pred, average="weighted")
         self._metrics["balanced_accuracy_score"] = balanced_accuracy_score(y, y_pred)
@@ -176,22 +176,21 @@ class TextClassificationPipeline:
                 return vectorizer.transform_X(self._preprocessed_data["statement"])
             else:
                 # split dataset on train and test
-                
-                    X_train, X_test, y_train, y_test = train_test_split(self._preprocessed_data["statement"], self._preprocessed_data["status"],
-                                                                        test_size=0.3, random_state=42, stratify=self._preprocessed_data["status"])
+                X_train, X_test, y_train, y_test = train_test_split(self._preprocessed_data["statement"], self._preprocessed_data["status"],
+                                                                    test_size=0.3, random_state=42, stratify=self._preprocessed_data["status"])
 
-                    vectorizer.fit_X(X_train)
+                vectorizer.fit_X(X_train)
 
-                    X_train = vectorizer.transform_X(X_train)
-                    X_test = vectorizer.transform_X(X_test)
+                X_train = vectorizer.transform_X(X_train)
+                X_test = vectorizer.transform_X(X_test)
 
-                    y_train = vectorizer.fit_transform_y(y_train)
-                    y_test = vectorizer.fit_transform_y(y_test)
+                y_train = vectorizer.fit_transform_y(y_train)
+                y_test = vectorizer.fit_transform_y(y_test)
 
-                    return X_train, X_test, y_train, y_test
+                return X_train, X_test, y_train, y_test
         else:
             raise NotImplementedError
-        
+
     def save_results(self) -> None:
         file = "results/" + self.enum2str(self._algorithm) + ".json"
         with open(file, 'w') as fp:
@@ -208,7 +207,7 @@ class TextClassificationPipeline:
             return ENUM2TARGET[target]
         except:
             raise ValueError(f"Given algorithm: {target} does not exist")
-    
+
     def get_checkpoint_name(
         self, 
         algorithm: str, 
