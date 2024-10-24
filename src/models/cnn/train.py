@@ -16,10 +16,10 @@ random.seed(SEED)
 np.random.seed(SEED)
 torch.manual_seed(SEED)
 
-def cnn_train(chekpoint_save, X_train, y_train, X_test, y_test, num_epochs=100, batch_size=32) -> None: # Need to return metrics and losses from each epoch and mean
+def cnn_train(chekpoint_save, X_train, y_train, X_test, y_test, num_epochs=100, batch_size=32):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    datamodule = CombinedDatamodule(X_train, y_train, X_test, y_test, train_bs=batch_size, test_bs=128)
+    datamodule = CombinedDatamodule(X_train, y_train, X_test, y_test, train_bs=batch_size, test_bs=batch_size)
     datamodule.setup()
     train_dataloader = datamodule.train_dataloader()
     test_dataloader = datamodule.test_dataloader()
@@ -28,7 +28,7 @@ def cnn_train(chekpoint_save, X_train, y_train, X_test, y_test, num_epochs=100, 
     print("[INFO] Start PsychoNet initialization")
     psycho_net.apply(ConvPsychoNet.initialize)
 
-    optimizer = optim.AdamW(psycho_net.parameters(), lr=2e-3, betas=(0.5, 0.9), weight_decay=1e-3)
+    optimizer = optim.AdamW(psycho_net.parameters(), lr=2e-5, betas=(0.7, 0.9), weight_decay=1e-2)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.97048695)
     ce_loss = nn.CrossEntropyLoss(torch.Tensor([4.0, 5.0, 1.0, 1.0, 16.0, 7.5, 1.2])).to(device)
     
@@ -64,16 +64,19 @@ def cnn_train(chekpoint_save, X_train, y_train, X_test, y_test, num_epochs=100, 
         train_metrics["f1score"].append(f1_score.compute().item())
         train_losses["ce"].append(np.array(celosses).mean())
 
-        val_loss = cnn_val(psycho_net, device, test_dataloader)
+        val_loss, val_f1 = cnn_val(psycho_net, device, test_dataloader)
         val_losses["ce"].append(val_loss)
 
-        if epoch % 2 == 0:
+        if epoch % 1 == 0:
             print(f"EPOCH={epoch}/TRAIN")
-            print(f"train_ce_loss={train_losses["ce"][-1]}, val_ce_loss={val_losses['ce'][-1]}, f1score={train_metrics['f1score'][-1]}")
+            print(f"train_ce_loss={train_losses["ce"][-1]}, val_ce_loss={val_losses['ce'][-1]}, train_f1score={train_metrics['f1score'][-1]}, val_f1score={val_f1}")
 
         scheduler.step()
-    
-    torch.save(psycho_net.state_dict(), f"{chekpoint_save}")
+
+        if val_f1 > best_f1score:
+            best_f1score = val_f1
+            torch.save(psycho_net.state_dict(), f"{chekpoint_save}")
+
     print(f"[INFO] Training end")
     return train_metrics, train_losses, val_losses
     
@@ -82,7 +85,8 @@ def cnn_val(psycho_net, device, test_dataloader):
 
     celosses = []
     ce_loss = nn.CrossEntropyLoss(torch.Tensor([4.0, 5.0, 1.0, 1.0, 16.0, 7.5, 1.2])).to(device)
-
+    f1_score = MulticlassF1Score(average="micro", num_classes=7).to(device)
+    f1_score.reset()
     with torch.no_grad():
         for X, y in test_dataloader:
             X = X.unsqueeze(dim=1)
@@ -91,7 +95,10 @@ def cnn_val(psycho_net, device, test_dataloader):
             celoss = ce_loss(pred, y)
             celosses.append(celoss.item())
 
+            y_pred = torch.softmax(pred, dim=1).argmax(dim=1)
+            f1_score.update(y_pred, y)
+
     psycho_net.train()
-    return np.array(celosses).mean()
+    return np.array(celosses).mean(), f1_score.compute().item()
     
 
