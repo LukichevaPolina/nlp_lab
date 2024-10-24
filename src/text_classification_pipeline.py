@@ -110,17 +110,12 @@ class TextClassificationPipeline:
         self.preprocess()
 
         if self._mode == Mode.INFER:
-<<<<<<< HEAD
             self.infer()
-=======
-            # TODO: vectorize data here is only words or class target too?
-            self.infer(vectorized_data)
->>>>>>> 7b83bd6 (stability training and dump ,metrics)
         else:
             X_train, X_test, y_train, y_test = self.vectorize()
             if self._mode == Mode.TRAIN:
                 self.train(X_train, y_train, X_test, y_test)
-                #self.eval(X_test, y_test) Only train, because eval break
+                self.eval(X_test, y_test)
             elif self._mode == Mode.EVAL:
                 self.eval(X_test, y_test)
             else:
@@ -135,7 +130,7 @@ class TextClassificationPipeline:
                 dt = DecisionTree(self._checkpoint_path)
                 dt.train(X_train, y_train)
             case Algorithm.CNN:
-                train_metrics, train_losses, val_losses = cnn_train(self._checkpoint_path, X_train, y_train, X_test, y_test, num_epochs=100, batch_size=64)
+                train_metrics, train_losses, val_losses = cnn_train(self._checkpoint_path, X_train, y_train, X_test, y_test, num_epochs=2, batch_size=128)
                 pd.DataFrame(train_metrics).to_csv(f"metrics/train_metrics_{self._metrics_path}")
                 pd.DataFrame(train_losses).to_csv(f"metrics/train_losses_{self._metrics_path}")
                 pd.DataFrame(val_losses).to_csv(f"metrics/val_losses_{self._metrics_path}")
@@ -152,13 +147,11 @@ class TextClassificationPipeline:
         self._metrics["f1-score-weighted"] = f1_score(y, y_pred, average="weighted")
         self._metrics["balanced_accuracy_score"] = balanced_accuracy_score(y, y_pred)
 
-<<<<<<< HEAD
         print("Classification report:")
         print(self._metrics)
 
         self.save_results()
 
-=======
         accuracy = -1.0
         f1 = -1.0
         if self._algorithm == Algorithm.SVM or self._algorithm == Algorithm.DECISION_TREE:
@@ -166,9 +159,8 @@ class TextClassificationPipeline:
             f1 = f1_score(y, y_pred, average="weighted")
         elif self._algorithm == Algorithm.CNN or self._algorithm == Algorithm.LSTM:
             device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-            # TODO add multiclass metrics print
-            compute_accuracy = MulticlassAccuracy(None, num_classes=7).to(device)
-            compute_f1_score = MulticlassF1Score(None, num_classes=7).to(device)
+            compute_accuracy = MulticlassAccuracy("macro", num_classes=7).to(device)
+            compute_f1_score = MulticlassF1Score("micro", num_classes=7).to(device)
             compute_accuracy.updata(y_pred, y)
             compute_f1_score.updata(y_pred, y)
             accuracy = compute_accuracy.compute().item() # Return not compute accuracy for all classes
@@ -178,7 +170,6 @@ class TextClassificationPipeline:
 
         print(f"Metrics on test data: \taccuracy = {accuracy}, \tf1_score = {f1}")
 
->>>>>>> 7b83bd6 (stability training and dump ,metrics)
     def infer(self, X) -> None:
         if not self._checkpoint_path.exists():
             raise RuntimeError(f"The checkpoint: {str(self._checkpoint_path)} does not exist, train first")
@@ -187,14 +178,11 @@ class TextClassificationPipeline:
             model = joblib.load(self._checkpoint_path)
             y = model.predict(X)
             return y
-<<<<<<< HEAD
-=======
         elif self._algorithm == Algorithm.CNN:
             y = cnn_infer(self._checkpoint_path, X)
             return y
         elif self._algorithm == Algorithm.LSTM:
             pass
->>>>>>> 7b83bd6 (stability training and dump ,metrics)
         else:
             NotImplementedError
 
