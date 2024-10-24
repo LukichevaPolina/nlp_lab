@@ -27,3 +27,4 @@ def class_features_distribution(data, plot_title, function, function_name) -> No
         ax[i // 4, i % 4].set(xlabel=f"{function_name}", ylabel="frequency")
     
     fig.savefig(f"{SAVE_PATH}class_features_distribution_{function_name}")
+    

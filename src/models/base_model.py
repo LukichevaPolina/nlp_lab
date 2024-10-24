@@ -13,11 +13,12 @@ class BaseModel:
             os.mknod(self._checkpoint_path)
 
         gridsearch = GridSearchCV(estimator=self.estimator,
-                              param_grid=self.param_grid,
-                              cv=2,
-                              scoring=["f1_weighted", "accuracy"],
-                              refit="f1_weighted",
-                              verbose=2)
+                                  param_grid=self.param_grid,
+                                  cv=2,
+                                  scoring=["f1_weighted", "balanced_accuracy"],
+                                  refit="f1_weighted",
+                                  verbose=2,
+                                  return_train_score=True)
         gridsearch.fit(X, y)
 
         joblib.dump(gridsearch.best_estimator_, self._checkpoint_path)
