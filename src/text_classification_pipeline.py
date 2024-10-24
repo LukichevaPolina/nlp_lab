@@ -202,7 +202,7 @@ class TextClassificationPipeline:
         except:
             raise ValueError(f"Given algorithm: {target} does not exist")
         
-    def enum2str(self, target: str) -> Algorithm:
+    def enum2str(self, target: Algorithm) -> str:
         try:
             return ENUM2TARGET[target]
         except:
