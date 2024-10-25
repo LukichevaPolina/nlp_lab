@@ -30,7 +30,7 @@ def cnn_train(chekpoint_save, X_train, y_train, X_test, y_test, num_epochs=100, 
 
     optimizer = optim.AdamW(psycho_net.parameters(), lr=2e-5, betas=(0.7, 0.9), weight_decay=1e-2)
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.97048695)
-    ce_loss = nn.CrossEntropyLoss(torch.Tensor([4.0, 5.0, 1.0, 1.0, 16.0, 7.5, 1.2])).to(device)
+    ce_loss = nn.CrossEntropyLoss(torch.Tensor([4.0, 5.0, 1.0, 1.0, 16.0, 8, 1.5])).to(device)
     
     accuracy = MulticlassAccuracy(average="macro", num_classes=7).to(device)
     f1_score = MulticlassF1Score(average="micro", num_classes=7).to(device)
@@ -87,7 +87,7 @@ def cnn_val(psycho_net, device, test_dataloader):
     psycho_net.eval()
 
     celosses = []
-    ce_loss = nn.CrossEntropyLoss(torch.Tensor([4.0, 5.0, 1.0, 1.0, 16.0, 7.5, 1.2])).to(device)
+    ce_loss = nn.CrossEntropyLoss(torch.Tensor([4.0, 5.0, 1.0, 1.0, 16.0, 8, 1.5])).to(device)
     f1_score = MulticlassF1Score(average="micro", num_classes=7).to(device)
     accuracy = MulticlassAccuracy(average="macro", num_classes=7).to(device)
     f1_score.reset()

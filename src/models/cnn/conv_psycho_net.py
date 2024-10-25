@@ -20,7 +20,7 @@ class ConvPsychoNet(nn.Module):
             conv3x3(4, 16, act=nn.LeakyReLU(negative_slope=0.02, inplace=True), norm=nn.BatchNorm2d(16), bias=False),
         )
 
-        self._gated = gate(966, 64, 966)
+        self._gated = gate(750, 256, 750)
 
         self._layer2 = nn.Sequential(
             conv3x3(16, 32, act=nn.LeakyReLU(negative_slope=0.02, inplace=True), norm=nn.BatchNorm2d(32), bias=False),        
@@ -29,16 +29,16 @@ class ConvPsychoNet(nn.Module):
 
         self._projection = conv1x1(64, 1, act=nn.LeakyReLU(negative_slope=0.02, inplace=True), norm=nn.BatchNorm2d(1), bias=False)
 
-        self._last_layer = nn.Linear(66, out_channels)
+        self._last_layer = nn.Linear(57, out_channels)
     
     def forward(self, x):
         out_first_conv = self._first_conv(x)
         #print(f"{out_first_conv.shape=}")
 
-        resized_out = out_first_conv.reshape(out_first_conv.shape[0], out_first_conv.shape[1], -1, 89)
-        #print(f"{resized_out.shape=}")
+        # resized_out = out_first_conv.reshape(out_first_conv.shape[0], out_first_conv.shape[1], -1, 89)
+        # print(f"{resized_out.shape=}")
 
-        out_layer1 = self._layer1(resized_out)
+        out_layer1 = self._layer1(out_first_conv)
         #print(f"{out_layer1.shape=}")
 
         gated_out = self._gated(out_layer1.reshape(out_layer1.shape[0], out_layer1.shape[1], 1, -1))
