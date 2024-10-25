@@ -3,9 +3,20 @@
 ## Prerequests
 > Python3.12 is used
 
-1. Install requirements.txt
+1. Clone the reposiroty
+```bash
+git clone https://github.com/LukichevaPolina/nlp_lab.git
+cd nlp_lab
+```
+
+2. Install requirements.txt
 ```bash
 pip3 install -r requirements.txt
+```
+
+3. Set up `PYTHONPATH`
+```bash
+export PYTHONPATH=$PYTHONPATH:$PWD
 ```
 
 ## EDA
@@ -30,24 +41,97 @@ Below we provide the histograms of more frequent words in our data.
 ![alt text](./graphs/data_info.png)
 > The chart consist of histogram of the top 20 frequently words. The top 3 words are `feel`, `like`, `want`.
 
-One of our preprocess include following steps: `drop_nan` -> `remove_punctuation` -> `remove_digits` -> `remove_stop_words` -> `tokenize` -> `stemming` -> `lemmatization`. The embeddings strategy is `tfidf`. We want to exam the four models: `svm`, `decision_tree`, `cnn` and `lstm`.
+One of our preprocess include following steps: `drop_nan` -> `remove_punctuation` -> `remove_digits` -> `remove_stop_words` -> `tokenize` -> `stemming` -> `lemmatization`. The embeddings strategy is `tfidf`. We want to exam the four models: `svm`, `decision_tree`, `cnn` and `linear`.
 
 ## Classical algorithms
 ### SVM
+**To train**
+```bash
+python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode train
+```
+
+**To eval**
+```bash
+python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval
+```
+
+#### Val metrics
+| class | f1_score |
+| ----- | -------- |
+| 0     | 0.78     |
+| 1     | 0.77     |
+| 2     | 0.69     |
+| 3     | 0.90     |
+| 4     | 0.64     |
+| 5     | 0.54     |
+| 6     | 0.65     |
+
+**accuracy** = 0.73, **f1_weighted** = 0.75
+
 ### Decision Tree
+
+**To train**
+```bash
+python3 main.py --dataset_path {dataset_path} --algorithm decision_tree --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode train
+```
+
+**To eval**
+```bash
+python3 main.py --dataset_path {dataset_path} --algorithm decision_tree --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval
+```
+
+#### Val metrics
+| class | f1_score |
+| ----- | -------- |
+| 0     | 0.59     |
+| 1     | 0.58     |
+| 2     | 0.58     |
+| 3     | 0.78     |
+| 4     | 0.50     |
+| 5     | 0.32     |
+| 6     | 0.52     |
+
+**accuracy** = 0.57, **f1_weighted** = 0.62
+
 ### Comparing
-Here need to add graph with metrics for two models
+Here need to add barplot consisted of svm: total f1 and accuracy, decision_tree: total f1 and accuracy
 
 ## DL algorithms
 ### CNN
-### LSTM
-### Comparing
-Here need to add graph with metrics for two models
+**To train**
+```bash
+python3 main.py --dataset_path {dataset_path} --algorithm cnn --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode train
+```
 
-Here need to add graph with losses for two models
+**To eval**
+```bash
+python3 main.py --dataset_path {dataset_path} --algorithm cnn --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval
+```
+
+#### Train metrics
+![alt text](./graphs/cnn_learning_curve.png) ![alt text](./graphs/cnn_accuracy_curve.png) ![alt text](./graphs/cnn_f1_curve.png)
+
+#### Val metrics
+Here need to add report from `eval.py`: f1_score per classes, then total f1 and accuracy
+
+### Linear
+**To train**
+```bash
+python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode train
+```
+
+**To eval**
+```bash
+python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval
+```
+
+#### Train metrics
+
+#### Val metrics
+Here need to add report from `eval.py`: f1_score per classes, then total f1 and accuracy
+
+### Comparing
+Here need to add barplot consisted of svm: total f1 and accuracy, decision_tree: total f1 and accuracy
 
 ## Total Comparing
-Here need to add graph with metrics for four models
-
-## Example of running
-python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval
+Here need to describe the results: which model is best and try to explain why
