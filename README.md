@@ -130,10 +130,8 @@ python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tf
 #### Val metrics
 Here need to add report from `eval.py`: f1_score per classes, then total f1 and accuracy
 
-
 ### Comparing
 Here need to add barplot consisted of svm: total f1 and accuracy, decision_tree: total f1 and accuracy
-
 
 ## Total Comparing
 Here need to describe the results: which model is best and try to explain why
