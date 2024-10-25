@@ -194,7 +194,8 @@ class TextClassificationPipeline:
     def eval(self, X, y) -> None:
         y_pred = self.infer(X)
         if self._algorithm == Algorithm.SVM or self._algorithm == Algorithm.DECISION_TREE:
-            f1_per_class = f1_score(y, y_pred, average=None) # TODO add computation
+            f1_per_classes = f1_score(y, y_pred, average=None)
+            f1_per_class = dict((i,j) for i,j in enumerate(f1_per_classes))
             accuracy = balanced_accuracy_score(y, y_pred)
             f1 = f1_score(y, y_pred, average="weighted")
             eval_metrics = {"f1_per_class": f1_per_class, "accuracy": accuracy, "f1_weighted": f1}

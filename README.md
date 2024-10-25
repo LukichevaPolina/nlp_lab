@@ -56,7 +56,17 @@ python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf
 ```
 
 #### Val metrics
-Here need to add report from `eval.py`: f1_score per classes, then total f1 and accuracy
+| class | f1_score |
+| ----- | -------- |
+| 0     | 0.78     |
+| 1     | 0.77     |
+| 2     | 0.69     |
+| 3     | 0.90     |
+| 4     | 0.64     |
+| 5     | 0.54     |
+| 6     | 0.65     |
+
+**accuracy** = 0.73, **f1_weighted** = 0.75
 
 ### Decision Tree
 
@@ -71,7 +81,17 @@ python3 main.py --dataset_path {dataset_path} --algorithm decision_tree --embedd
 ```
 
 #### Val metrics
-Here need to add report from `eval.py`: f1_score per classes, then total f1 and accuracy
+| class | f1_score |
+| ----- | -------- |
+| 0     | 0.59     |
+| 1     | 0.58     |
+| 2     | 0.58     |
+| 3     | 0.78     |
+| 4     | 0.50     |
+| 5     | 0.32     |
+| 6     | 0.52     |
+
+**accuracy** = 0.57, **f1_weighted** = 0.62
 
 ### Comparing
 Here need to add barplot consisted of svm: total f1 and accuracy, decision_tree: total f1 and accuracy
