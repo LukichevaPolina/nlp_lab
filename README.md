@@ -126,12 +126,13 @@ python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tf
 ```
 
 #### Train metrics
+![alt text](./graphs/linear_learning_curve.png) ![alt text](./graphs/linear_accuracy_curve.png) ![alt text](./graphs/linear_f1_curve.png)
 
 #### Val metrics
 Here need to add report from `eval.py`: f1_score per classes, then total f1 and accuracy
 
 ### Comparing
-Here need to add barplot consisted of svm: total f1 and accuracy, decision_tree: total f1 and accuracy
+Here need to add barplot consisted of cnn: total f1 and accuracy, linear: total f1 and accuracy
 
 ## Total Comparing
 Here need to describe the results: which model is best and try to explain why
