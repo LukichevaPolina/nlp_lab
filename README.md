@@ -23,7 +23,7 @@ export PYTHONPATH=$PYTHONPATH:$PWD
 Dataset is taken from [kaggle](https://www.kaggle.com/datasets/suchintikasarkar/sentiment-analysis-for-mental-health/data), navigate to more description. To brief, dataset consist of two columns with `statement` and `status` name. The `status` is our target, which could take seven different value, so we deal with multiclass classification. The total amount of row is 53043, some of this rows are nan, so we remove them. It lead to 52681 appropriate rows. Below you could see the distribution of our targets(or classes).
 ![alt text](./graphs/class_distribution.png)
 
-As you can see we have disbalanced classes, we deal with it using [class weight](https://scikit-learn.org/stable/modules/generated/sklearn.utils.class_weight.compute_class_weight.html) approach. Below we provide a little more statistics of our data.
+As you can see we have disbalanced classes, we deal with it using [class weight](https://scikit-learn.org/stable/modules/generated/sklearn.utils.class-weight.compute_class-weight.html) approach. Below we provide a little more statistics of our data.
 
 ![alt text](./graphs/class_features_distribution_length.png)
 > The chart consist of histograms of the sentences length. Notice that a huge frequency corresponds to relative short sentences. A long sentences relate to Suicidal, Personality disorder, following by Anxiety, Depression, Bipolar and Stress. A smallest sentences belong to Normal.
@@ -47,12 +47,12 @@ One of our preprocess include following steps: `drop_nan` -> `remove_punctuation
 ### SVM
 **To train**
 ```bash
-python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode train
+python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf --class_balancer class-weight --preprocessor remove-all --mode train
 ```
 
 **To eval**
 ```bash
-python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval
+python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf --class_balancer class-weight --preprocessor remove-all --mode eval
 ```
 
 #### Val metrics
@@ -72,12 +72,12 @@ python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf
 
 **To train**
 ```bash
-python3 main.py --dataset_path {dataset_path} --algorithm decision_tree --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode train
+python3 main.py --dataset_path {dataset_path} --algorithm decision-tree --embeddigns tfidf --class_balancer class-weight --preprocessor remove-all --mode train
 ```
 
 **To eval**
 ```bash
-python3 main.py --dataset_path {dataset_path} --algorithm decision_tree --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval
+python3 main.py --dataset_path {dataset_path} --algorithm decision-tree --embeddigns tfidf --class_balancer class-weight --preprocessor remove-all --mode eval
 ```
 
 #### Val metrics
@@ -93,46 +93,61 @@ python3 main.py --dataset_path {dataset_path} --algorithm decision_tree --embedd
 
 **accuracy** = 0.57, **f1_weighted** = 0.62
 
-### Comparing
-Here need to add barplot consisted of svm: total f1 and accuracy, decision_tree: total f1 and accuracy
-
 ## DL algorithms
 ### CNN
 **To train**
 ```bash
-python3 main.py --dataset_path {dataset_path} --algorithm cnn --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode train
+python3 main.py --dataset_path {dataset_path} --algorithm cnn --embeddigns tfidf --class_balancer class-weight --preprocessor remove-all --mode train
 ```
 
 **To eval**
 ```bash
-python3 main.py --dataset_path {dataset_path} --algorithm cnn --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval
+python3 main.py --dataset_path {dataset_path} --algorithm cnn --embeddigns tfidf --class_balancer class-weight --preprocessor remove-all --mode eval
 ```
 
 #### Train metrics
 ![alt text](./graphs/cnn_learning_curve.png) ![alt text](./graphs/cnn_accuracy_curve.png) ![alt text](./graphs/cnn_f1_curve.png)
 
 #### Val metrics
-Here need to add report from `eval.py`: f1_score per classes, then total f1 and accuracy
+| class | f1_score |
+| ----- | -------- |
+| 0     | 0.76     |
+| 1     | 0.78     |
+| 2     | 0.69     |
+| 3     | 0.88     |
+| 4     | 0.69     |
+| 5     | 0.56     |
+| 6     | 0.64     |
+
+**accuracy** = 0.71, **f1_weighted** = 0.74
 
 ### Linear
 **To train**
 ```bash
-python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode train
+python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tfidf --class_balancer class-weight --preprocessor remove-all --mode train
 ```
 
 **To eval**
 ```bash
-python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tfidf --class_balancer class_weight --preprocessor remove_all --mode eval
+python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tfidf --class_balancer class-weight --preprocessor remove-all --mode eval
 ```
 
 #### Train metrics
 ![alt text](./graphs/linear_learning_curve.png) ![alt text](./graphs/linear_accuracy_curve.png) ![alt text](./graphs/linear_f1_curve.png)
 
 #### Val metrics
-Here need to add report from `eval.py`: f1_score per classes, then total f1 and accuracy
+#### Val metrics
+| class | f1_score |
+| ----- | -------- |
+| 0     | 0.63     |
+| 1     | 0.56     |
+| 2     | 0.61     |
+| 3     | 0.84     |
+| 4     | 0.49     |
+| 5     | 0.42     |
+| 6     | 0.59     |
 
-### Comparing
-Here need to add barplot consisted of cnn: total f1 and accuracy, linear: total f1 and accuracy
+**accuracy** = 0.61, **f1_weighted** = 0.67
 
 ## Total Comparing
-Here need to describe the results: which model is best and try to explain why
+![alt text](./graphs/plot_val_metrics_all.png)
