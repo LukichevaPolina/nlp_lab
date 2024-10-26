@@ -1,6 +1,7 @@
 import torch
 from src.models.cnn.conv_psycho_net import ConvPsychoNet
 
+
 def cnn_infer(checkpoint_path, X):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     psycho_net = ConvPsychoNet(1, 7).to(device)
@@ -8,10 +9,12 @@ def cnn_infer(checkpoint_path, X):
     psycho_net.eval()
 
     with torch.no_grad():
-        X = torch.from_numpy(X.toarray().reshape(-1, 14951)).float().unsqueeze(dim=0).unsqueeze(dim=1)
-        pred = psycho_net(X)
+        shape = X.toarray().shape
+        X = torch.from_numpy(X.toarray()).float().unsqueeze(
+            dim=1).unsqueeze(dim=2).reshape(shape[0], 1, -1, 599)
 
-        y_pred = torch.softmax(pred, dim=1).armax(dim=1)
+        pred = psycho_net(X).squeeze()
 
-    # TODO: probably necessary convert to numpy array
+        y_pred = torch.softmax(pred, dim=1).argmax(dim=1)
+
     return y_pred

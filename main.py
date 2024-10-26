@@ -3,6 +3,7 @@ import argparse
 from src.text_classification_pipeline import TextClassificationPipeline
 from typing import Dict
 
+
 def parse_args() -> Dict[str, str]:
     args = argparse.ArgumentParser()
     args.add_argument(
@@ -15,28 +16,29 @@ def parse_args() -> Dict[str, str]:
         "--algorithm",
         required=True,
         type=str,
-        choices=["svm", "decision_tree", "linear", "cnn"], #TODO add option for all
+        choices=["svm", "decision-tree", "linear",
+                 "cnn"],  # TODO add option for all
         help="algorithm to process"
     )
     args.add_argument(
         "--embeddigns",
         required=True,
         type=str,
-        choices=["tfidf", "word2vec"], #TODO add option for all
+        choices=["tfidf", "word2vec"],  # TODO add option for all
         help="embedding which is used"
     )
     args.add_argument(
         "--class_balancer",
         required=True,
         type=str,
-        choices=["class_weight", "union"], #TODO add option for all
+        choices=["class-weight", "union"],  # TODO add option for all
         help="the strategy to deal with class disbalance"
     )
     args.add_argument(
         "--preprocessor",
         required=True,
         type=str,
-        choices=["remove_all"], #TODO add option for all
+        choices=["remove-all"],  # TODO add option for all
         help="the strategy to do preprocess"
     )
     args.add_argument(
@@ -51,6 +53,7 @@ def parse_args() -> Dict[str, str]:
 
     return vars(args.parse_args())
 
+
 def main() -> None:
     args = parse_args()
     pipeline = TextClassificationPipeline(
@@ -63,6 +66,7 @@ def main() -> None:
     )
 
     pipeline.run()
+
 
 if __name__ == "__main__":
     sys.exit(main() or 0)
