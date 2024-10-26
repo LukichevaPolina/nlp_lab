@@ -15,7 +15,7 @@ def parse_args() -> Dict[str, str]:
         "--algorithm",
         required=True,
         type=str,
-        choices=["svm", "decision_tree", "lstm", "cnn"], #TODO add option for all
+        choices=["svm", "decision_tree", "linear", "cnn"], #TODO add option for all
         help="algorithm to process"
     )
     args.add_argument(
@@ -43,11 +43,10 @@ def parse_args() -> Dict[str, str]:
         "--mode",
         required=True,
         type=str,
-        choices=["train", "eval", "infer"],
+        choices=["train", "eval"],
         help="mode which used: \
               train - model will be trained and evaluated, \
-              eval  - model will be evaluated, \
-              infer - run inference on the entire dataset"
+              eval  - model will be evaluated"
     )
 
     return vars(args.parse_args())
