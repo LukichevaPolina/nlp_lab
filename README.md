@@ -160,11 +160,11 @@ python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tf
 **accuracy** = 0.61, **f1_weighted** = 0.67
 
 ## Total Comparing
-The best model 
+The best model is SVM because this algorithm is able to find the hyperplane that maximizes the separation compared to other methods. It is also capable of handling unbalanced datasets.
 ![alt text](./graphs/plot_metrics_all.png)
 
 
-## Experiements
+## Experiments
 ### Prepocessing 
 We experemented with preprocessing on classical models. We have three types of experiements: 
 1. Preprocessing (removing all punctuation, digits and stop-words) + lemmatization
@@ -173,7 +173,7 @@ We experemented with preprocessing on classical models. We have three types of e
 
 As evidenced by the plots, there is no significant difference between the results. This is likely due to the fact that the models focused on the "specific" aspect of the person condition.
 
-| SVM | Decisin Tree |
+| SVM | Decision Tree |
 :----:|:--------------:
 ![alt text](./graphs/plot_metrics_svm.png) | ![alt text](./graphs/plot_metrics_decision_tree.png)
 
