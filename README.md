@@ -136,7 +136,6 @@ python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tf
 ![alt text](./graphs/linear_learning_curve.png) ![alt text](./graphs/linear_accuracy_curve.png) ![alt text](./graphs/linear_f1_curve.png)
 
 #### Val metrics
-#### Val metrics
 | class | f1_score |
 | ----- | -------- |
 | 0     | 0.63     |
