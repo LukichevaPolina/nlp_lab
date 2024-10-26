@@ -1,13 +1,18 @@
 import os
 import json
 
+from typing import Dict
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+import argparse
+
 # used for parsing model names and vectorizer types from filenames with matrics
 MODEL_IDX = 3
 VECTORIZER_IDX = 4
+PREPOCESSING_IDX = 6
 
 SAVE_PATH = "graphs/"
 METRICS_PATH = "metrics/"
@@ -55,18 +60,24 @@ def plot_f1_curve(train_f1, val_f1, name):
     fig.savefig(f"{SAVE_PATH}{name}.png")
 
 
-def plot_metrics(files=None, plot_name="plot_val_metrics_all"):
+def plot_metrics(files=None, plot_name="plot_metrics_all", filter=None):
     extention = ".json"
     l = [_ for _ in os.listdir(METRICS_PATH)]
+
+    if filter != None:
+        files = [_ for _ in os.listdir(METRICS_PATH) if filter in _]
+
     if files == None:
         files = [_ for _ in os.listdir(METRICS_PATH) if _.endswith(extention)]
+
     n_models = len(files)
 
     results = {"models": [], "f1_weighted": [], "accuracy": []}
     for i, filename in enumerate(files):
-        result_params = filename.split("_")
+        result_params = filename.split(".")[0].split("_")
         model_name = result_params[MODEL_IDX] + \
-            "_" + result_params[VECTORIZER_IDX]
+            " " + result_params[VECTORIZER_IDX] + \
+            "\n" + result_params[PREPOCESSING_IDX]
         results["models"].append(model_name)
         with open(METRICS_PATH + filename, 'r') as file:
             model_res = json.load(file)
@@ -94,3 +105,28 @@ def plot_metrics(files=None, plot_name="plot_val_metrics_all"):
     plt.legend()
 
     fig.savefig(f"{SAVE_PATH}{plot_name}.png")
+
+
+def parse_args() -> Dict[str, str]:
+    args = argparse.ArgumentParser()
+    args.add_argument(
+        "--filter",
+        required=True,
+        type=str,
+        help="filter"
+    )
+    args.add_argument(
+        "--plot_name",
+        required=True,
+        type=str,
+        help="plot_name"
+    )
+
+    return vars(args.parse_args())
+
+if __name__ == "__main__":
+    SAVE_PATH = "../../graphs/"
+    METRICS_PATH = "../../metrics/"
+
+    args = parse_args()
+    plot_metrics(filter=args["filter"], plot_name=args["plot_name"])

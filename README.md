@@ -68,6 +68,9 @@ python3 main.py --dataset_path {dataset_path} --algorithm svm --embeddigns tfidf
 
 **accuracy** = 0.73, **f1_weighted** = 0.75
 
+##### Details
+Grid parametrs search was made. Best parameters from gridsearch: {'C': 1, 'multi_class': 'ovr'}
+
 ### Decision Tree
 
 **To train**
@@ -93,6 +96,9 @@ python3 main.py --dataset_path {dataset_path} --algorithm decision-tree --embedd
 
 **accuracy** = 0.57, **f1_weighted** = 0.62
 
+##### Details
+Grid parametrs search was made. Best parameters from gridsearch: {'criterion': 'gini', 'max_depth': 12}
+
 ## DL algorithms
 ### CNN
 **To train**
@@ -106,7 +112,10 @@ python3 main.py --dataset_path {dataset_path} --algorithm cnn --embeddigns tfidf
 ```
 
 #### Train metrics
-![alt text](./graphs/cnn_learning_curve.png) ![alt text](./graphs/cnn_accuracy_curve.png) ![alt text](./graphs/cnn_f1_curve.png)
+
+| Learning Curve | Accuracy Curve | F1 Curve |
+:---------------:|:--------------:|:---------:
+![alt text](./graphs/cnn_learning_curve.png) | ![alt text](./graphs/cnn_accuracy_curve.png) | ![alt text](./graphs/cnn_f1_curve.png)
 
 #### Val metrics
 | class | f1_score |
@@ -133,9 +142,10 @@ python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tf
 ```
 
 #### Train metrics
-![alt text](./graphs/linear_learning_curve.png) ![alt text](./graphs/linear_accuracy_curve.png) ![alt text](./graphs/linear_f1_curve.png)
+| Learning Curve | Accuracy Curve | F1 Curve |
+:---------------:|:--------------:|:---------:
+![alt text](./graphs/linear_learning_curve.png) | ![alt text](./graphs/linear_accuracy_curve.png) | ![alt text](./graphs/linear_f1_curve.png)
 
-#### Val metrics
 #### Val metrics
 | class | f1_score |
 | ----- | -------- |
@@ -150,4 +160,26 @@ python3 main.py --dataset_path {dataset_path} --algorithm linear --embeddigns tf
 **accuracy** = 0.61, **f1_weighted** = 0.67
 
 ## Total Comparing
-![alt text](./graphs/plot_val_metrics_all.png)
+The best model 
+![alt text](./graphs/plot_metrics_all.png)
+
+
+## Experiements
+### Prepocessing 
+We experemented with preprocessing on classical models. We have three types of experiements: 
+1. Preprocessing (removing all punctuation, digits and stop-words) + lemmatization
+2. Preprocessing (removing all punctuation) + lemmatization
+3. Preprocessing (removing all punctuation, digits and stop-words) + stemming.
+
+As evidenced by the plots, there is no significant difference between the results. This is likely due to the fact that the models focused on the "specific" aspect of the person condition.
+
+| SVM | Decisin Tree |
+:----:|:--------------:
+![alt text](./graphs/plot_metrics_svm.png) | ![alt text](./graphs/plot_metrics_decision_tree.png)
+
+### Parametr searching
+#### Classical models
+Grid search was aplied. For SVC models were checked {"C": [1, 10, 100, 1000], "multi_class": ["ovr", "crammer_singer"]} parametrs.
+For Decision Tree were checked {'criterion': [gini', 'entropy'], 'max_depth': np.arange(3, 15)} parametrs.
+#### DL models
+A series of experiments was conducted to test the impact of varying the learning rate (1e-3, 2e-5, 2e-3) at the optimizer, regularization weight, and scheduler. Additionally, the batch size was modified from 64 to 128. To account for class imbalance, different weights were used in cross entropy.
