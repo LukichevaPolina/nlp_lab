@@ -15,4 +15,7 @@ class CombinedDataset(Dataset):
     
     def __getitem__(self, index):
         X, y = self._X[index], self._y[index]
-        return torch.from_numpy(X.toarray().reshape(-1, 599)).float(), torch.as_tensor(y).long()
+        print(X.shape)
+        X = torch.from_numpy(X.toarray().reshape(-1, 599)).float()
+        print(X.shape)
+        return X, torch.as_tensor(y).long()

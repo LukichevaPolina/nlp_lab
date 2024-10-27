@@ -38,7 +38,7 @@ def parse_args() -> Dict[str, str]:
         "--preprocessor",
         required=True,
         type=str,
-        choices=["remove-all"],  # TODO add option for all
+        choices=["remove-all", "remove-punctuation", "remove-all-stem"],  # TODO add option for all
         help="the strategy to do preprocess"
     )
     args.add_argument(

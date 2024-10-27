@@ -22,7 +22,7 @@ from src.eda.preprocessing.preprocessing import (
     drop_nan, remove_punctuation, remove_digits, remove_stop_words,
     tokenize, stemming, lemmatization
 )
-from src.eda.preprocessing.embeddings import TFIDFVectorizer
+from src.eda.preprocessing.embeddings import TFIDFVectorizer, Word2vecVectorizer
 from src.eda.rendering.statistics import (
     class_features_distribution, plot_class_distribution
 )
@@ -54,7 +54,9 @@ torch.manual_seed(SEED)
 
 
 class Preprocessor(Enum):
-    REMOWE_ALL_STOP_WORDS_AND_PUNCTUATION = 1
+    REMOVE_ALL_STOP_WORDS_AND_PUNCTUATION = 1
+    REMOVE_PUNCTUATION = 2
+    REMOVE_ALL_WITH_STEMMING = 3
 
 
 class ClassBalancer(Enum):
@@ -89,7 +91,9 @@ TARGET2ENUM = {
     "word2vec": Embeddings.WORD2VEC,
     "class-weight": ClassBalancer.CLASS_WEIGHT,
     "union": ClassBalancer.UNION,
-    "remove-all": Preprocessor.REMOWE_ALL_STOP_WORDS_AND_PUNCTUATION,
+    "remove-all": Preprocessor.REMOVE_ALL_STOP_WORDS_AND_PUNCTUATION,
+    "remove-punctuation": Preprocessor.REMOVE_PUNCTUATION,
+    "remove-all-stem": Preprocessor.REMOVE_ALL_WITH_STEMMING,
     "train": Mode.TRAIN,
     "eval": Mode.EVAL,
     "infer": Mode.INFER
@@ -134,7 +138,38 @@ class TextClassificationPipeline:
             ValueError("Wrong mode")
 
     def preprocess(self) -> pd.DataFrame:
-        if self._preprocessor == Preprocessor.REMOWE_ALL_STOP_WORDS_AND_PUNCTUATION:
+        if self._preprocessor == Preprocessor.REMOVE_ALL_STOP_WORDS_AND_PUNCTUATION:
+            preprocess_data = drop_nan(self._dataset)
+            plot_class_distribution(preprocess_data)
+            class_features_distribution(
+                preprocess_data, "Length distribution", lambda x: len(x), "length")
+            class_features_distribution(preprocess_data, "Punctuation length distribution", lambda x: len(
+                [let for let in x if let in punctuation]), "punctuation_length")
+            class_features_distribution(preprocess_data, "Digit length distribution", lambda x: len(
+                [let for let in x if let.isdigit()]), "digit_length")
+            preprocess_data = remove_punctuation(preprocess_data)
+            preprocess_data = remove_digits(preprocess_data)
+            preprocess_data = remove_stop_words(preprocess_data)
+            preprocess_data = tokenize(preprocess_data)
+            # preprocess_data = stemming(preprocess_data)
+            preprocess_data = lemmatization(preprocess_data)
+            plot_data_information(preprocess_data)
+            self._preprocessed_data = preprocess_data
+        elif self._preprocessor == Preprocessor.REMOVE_PUNCTUATION:
+            preprocess_data = drop_nan(self._dataset)
+            plot_class_distribution(preprocess_data)
+            class_features_distribution(
+                preprocess_data, "Length distribution", lambda x: len(x), "length")
+            class_features_distribution(preprocess_data, "Punctuation length distribution", lambda x: len(
+                [let for let in x if let in punctuation]), "punctuation_length")
+            class_features_distribution(preprocess_data, "Digit length distribution", lambda x: len(
+                [let for let in x if let.isdigit()]), "digit_length")
+            preprocess_data = remove_punctuation(preprocess_data)
+            preprocess_data = tokenize(preprocess_data)
+            preprocess_data = lemmatization(preprocess_data)
+            plot_data_information(preprocess_data)
+            self._preprocessed_data = preprocess_data
+        elif self._preprocessor == Preprocessor.REMOVE_ALL_WITH_STEMMING:
             preprocess_data = drop_nan(self._dataset)
             plot_class_distribution(preprocess_data)
             class_features_distribution(
@@ -148,7 +183,6 @@ class TextClassificationPipeline:
             preprocess_data = remove_stop_words(preprocess_data)
             preprocess_data = tokenize(preprocess_data)
             preprocess_data = stemming(preprocess_data)
-            preprocess_data = lemmatization(preprocess_data)
             plot_data_information(preprocess_data)
             self._preprocessed_data = preprocess_data
         else:
@@ -157,25 +191,27 @@ class TextClassificationPipeline:
     def vectorize(self) -> Any:
         if self._embedder == Embeddings.TFIDF:
             vectorizer = TFIDFVectorizer()
-            X_train, X_test, y_train, y_test = train_test_split(
-                self._preprocessed_data["statement"],
-                self._preprocessed_data["status"],
-                test_size=0.3,
-                random_state=42,
-                stratify=self._preprocessed_data["status"]
-            )
-
-            vectorizer.fit_X(X_train)
-
-            X_train = vectorizer.transform_X(X_train)
-            X_test = vectorizer.transform_X(X_test)
-
-            y_train = vectorizer.fit_transform_y(y_train)
-            y_test = vectorizer.fit_transform_y(y_test)
-
-            return X_train, X_test, y_train, y_test
+        elif self._embedder == Embeddings.WORD2VEC:
+            vectorizer = Word2vecVectorizer()
         else:
             raise NotImplementedError
+        X_train, X_test, y_train, y_test = train_test_split(
+            self._preprocessed_data["statement"],
+            self._preprocessed_data["status"],
+            test_size=0.3,
+            random_state=42,
+            stratify=self._preprocessed_data["status"]
+        )
+
+        vectorizer.fit_X(X_train)
+
+        X_train = vectorizer.transform_X(X_train)
+        X_test = vectorizer.transform_X(X_test)
+
+        y_train = vectorizer.fit_transform_y(y_train)
+        y_test = vectorizer.fit_transform_y(y_test)
+
+        return X_train, X_test, y_train, y_test
 
     def train(self, X_train, y_train, X_test, y_test) -> None:
         match self._algorithm:
